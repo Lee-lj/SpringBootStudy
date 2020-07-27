@@ -1,0 +1,34 @@
+Spring boot整合默认不支持的JSP的步骤:
+
+1.Spring boot默认不支持JSP，如果Spring boot不使用外部的tomcat，而使用内置的tomcat，则创建项目的时候打包方式就为jar格式，要使用外部的tomcat则打包方式改为war
+      打war包格式时:
+       <dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-tomcat</artifactId>
+			<scope>provided</scope>
+		</dependency> ,内置的tomcat级别变为provided，以后打包时就不会将内置的tomcat打包
+		
+2.建立基本的web项目所需要的目录结构:
+        BootWithJsp/src/main/webapp,在这个路径下，再在webapp中建立/WEB-INF文件夹(BootWithJsp/src/main/webapp/WEBINF),
+                        再建立index.jsp(BootWithJsp/src/main/webapp/index.jsp)
+            
+3.创建tomcat实例并部署项目
+                       先使用Maven将项目打成war包，再创建服务器然后运行，外置tomcat之后
+        web的启动路径为域名/端口/项目/文件名
+
+
+一个Spring boot项目，在启动tomcat时，会自动调用ServletInitializer类中的configure方法，，然后configure又会调用Springboot的主配置类
+         所以在启动外部tomcat时也会启动spring boot
+
+
+
+
+
+
+
+
+
+
+
+
+

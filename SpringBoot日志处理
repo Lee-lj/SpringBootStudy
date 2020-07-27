@@ -1,0 +1,29 @@
+日志处理:
+             日志框架主要有: UCL  JUL  jboss-logging,logback,log4j,log4j2,slf4j...等等
+	spring boot默认选用slf4j，logback
+	spring boot默认帮我们配置好了日志，我们直接使用即可。
+	日志级别：      定义一个日志级别后这个级别以下的将不再打印
+		TRACE< DEBUG< INFO<WARN< ERROR< FATAL<OFF
+
+	springboot默认的日志级别是info（即只打印  info及之后级别的信息）；也可以自定义级别：全局配置文件中logging.level.org.yq.HelloWorld=warn ,即logging.level.主配置类所在包=级别
+
+	可以通过配置 将日志信息 存储到文件中 logging.file=springboot.log  存储到了项目的根目录中的springboot.log
+	也可以指定 具体的日志路径：logging.file.name=D:/springboot.log
+
+	也可以存储到一个 文件夹中 ，logging.file.path=D:/log/，并且默认的文件名是spring.log
+
+	指定日志显示格式：
+		a.日志显示在console中
+			logging.pattern.console=%d{yyyy-MM-dd} [%thread] %-5level %logger{50} - %msg%n
+					%d:日期时间
+					%thread：线程名
+					%-5level： 显示日志级别,-5表示从左显示5个字符宽度
+					%logger{50} :设置日志长度  ，例如o.s.w.s.m.m.a.
+					%msg：日志消息
+					%n ：回车
+		b.日志显示在文件中
+			logging.pattern.file=%d{yyyy-MM-dd} ** [%thread] ** %-5level ** %logger{50}** %msg%n
+
+			
+	默认的日志格式，是在 jar包中 相应包的xml文件中进行配置。
+	日志的具体使用规范：官方说明https://docs.spring.io/spring-boot/docs/2.0.4.RELEASE/reference/htmlsingle/#boot-features-custom-log-configuration

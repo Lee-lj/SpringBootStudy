@@ -1,0 +1,41 @@
+开发，测试，实施所处环境可能不一样，这就用到了多环境的切换
+多环境的切换（设置profile）
+	1. 通过properties文件切换
+	默认boot会读取主配置文件application.properties环境8888
+	多个peoperties的命名方式:application-环境名.properties
+	
+	(development开发环境)application-dev.properties  端口号7777
+	(测试环境)application-test.properties 端口号6666
+
+	如果要选择某一个具体的环境： application.properties中指定：spring.profiles.active=环境名(development/test)
+
+	如果将application.properties注释掉，spring boot不会读取其他appilcation-环境名.properties中的配置。并且properties的优先级高于yml
+
+
+	2.yml中用---来划分区域，必须为三个-
+	第一个环境（主环境）
+	server:
+        port: 8888 
+    spring:
+        profiles:
+           active:
+              - development
+	---
+	server:  
+ 	    port: 7777
+	spring:
+	    profiles: development
+	---
+	server:
+	    port: 6666
+	spring:
+ 	    profiles: test
+	3.动态切换环境(不声明环境，运行时动态选择)
+	 	1:通过运行参数指定环境
+		（1）STS(Eclipse)右键:run as :Run Configuration - Argument - program Argument	前面为两个-
+			--spring.profiles.active=development/test(环境名)  放入program Argument即可指定环境
+		 (2)命令行方式：先用maven打包(package),然后进入jar包所在位置cmd，输入以下代码
+			java -jar 项目名.jar --spring.profiles.active=环境名
+		2:通过vm参数指定环境(和第一个通过运行参数设置类似，但是VM是在虚拟机运行时，使用命令，来改变环境)
+			STS(Eclipse)右键:run as :Run Configuration - Argument - VM	前面为一个-
+			-Dspring.profiles.active=环境名

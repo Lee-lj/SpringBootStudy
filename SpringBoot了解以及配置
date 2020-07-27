@@ -1,0 +1,69 @@
+微服务:一个项目可以由多个小型服务构成，小型服务就称为微服务，这样由小型服务构成的项目各个功能之间独立性高，便于更改，
+
+Springboot就是快速开发微服务的工具
+spring boot可以快速开发 微服务模块,功能:
+	a.简化j2ee开发
+	b.整个spring技术栈的整合（整合springmvc  spring）	
+	c.整个j2ee技术的整合（整合mybatis redis）
+	
+在Spring.io的Springboot的Quickstart Your Project
+Bootstrap your application with Spring Initializr.，建立Springboot项目的压缩包，然后sts打开，spring boot将各个应用/三方框架 设置成了一个个“场景”stater，
+ 以后要用哪个，只需要引入那个场景即可。选完之后，spring boot就会将 该场景所需要的所有依赖 自动注入。 例如 选择 “web”,spring boot就会将web相关的依赖（tomcat  json） 全部引入本项目
+内置了tomcat，所以不用自己搭建本地tomcat. 还可以直接在sts中file-new-Spring started project-跟网站一样填写包，类，直接生成项目
+
+@SpringBootApplication所注释的类为spring boot的主配置类
+该注解包含(	  使用这些自动注解就相当于在Spring,Spring boot,Mybatis当中配置的各种xml):
+	1.@SpringBootConfiguration： 包含@Configuration，表示“配置类”: 
+								1.该类是一个配置类	
+								2.加了@Configuration注解的类，会自动纳入Spring 容器  （例如spring中的@Component注解）
+                                                                                                                               例如    @Configuration
+                                              public class A//表示A是一个 用于 配置的类{}
+    2.@EnableAutoConfiguration：使spring boot可以自动配置 ：可以找到@SpringBootApplication所在类的包 ，就会将该包（package org.lee.helloworld.xxx）及所有的子包 全部纳入spring容器
+	  spring boot在启动时，会根据META-INF/spring.factories找到相应的三方依赖，并将这些依赖引入本项目
+	  
+总结：
+	编写项目时，一般会 对自己写的代码  以及 三方依赖 进行配置。但是spring boot可以自动进行配置：
+	  a:自己写的代码,spring boot通过@SpringBootConfiguration自动帮我们配置；
+	  b. 三方依赖 通过spring-boot-autoconfigure-2.0.3.RELEASE.jar中的META-INF/spring.factories进行声明，然后通过@EnableAutoConfiguration注解开启使用
+	        (spring-boot-autoconfigure-2.0.3.RELEASE.jar包中 包含了 J2EE整合体系中 需要的依赖。)
+	  c.如何自动装配：
+		研究org.springframework.boot.autoconfigure.web.servlet.HttpEncodingAutoConfiguration,\通过观察该源码发现：
+		@Configuration：标识此类是一个配置类  、将此类纳入springioc容器
+		@EnableConfigurationProperties(HttpEncodingProperties.class)： 通过HttpEncodingProperties将编码设置为了UTF_8 (即自动装配为UTF_8, 如何修改改编码：通过该HttpEncodingProperties的 predfix+属性名 进行修改 [配置文件中，yml/properties])
+		   即：该注解给了默认编码utf8，并且提供了prefix+属性名 的方式 供我们修改编码。
+
+		@ConditionalOnProperty(prefix = "spring.http.encoding", value = "enabled", matchIfMissing = true)
+		当属性满足要求(括号中的属性)时，此条件成立，要求如果在application-properties中没有配置spring.http.encoding.enabled=xxx, 则@ConditionalOnProperty成立。
+    
+Springboot项目目录结构resources：
+	static:静态资源（js css 图片 音频 视频）
+	templates：模板文件（模版推荐引擎freemarker ,thymeleaf；默认不支持jsp）
+	application.properties： 配置文件
+	
+	如果提示8080端口被占用，cmd输入指令netstat -ano 查看所有端口信息，记住占用8080端口的PID例如2626，然后taskkill /F /pid 2626 杀死进程      已终止 PID 为2626 11720 的进程。
+
+
+
+	pom.xml中的父类boot-dependence已经定义了依赖的jar的版本信息，以后使用jar可以不用定义版本信息
+	
+	6spring boot内置了tomcat，并且不需要打成war再执行。
+           可以在appication.properties对端口号等服务端信息进行配置:
+            1.server.port=8888        将端口号由8080改为8888
+            2.server.context-path = “xxxx”
+                                                    如果server.context-path没有配，请求的url地址就是 localhost : port/mqcp/convert
+                                                   如果server.context-path = “/market/task”, 请求的url地址就是 localhost : port/market/task/mqcp/convert
+            3.spring.http.encoding.charset=ISO-8859-1 将默认的编码格式UTF-8改为ISO-8859-1
+            
+  
+		@ConditionalOnProperty(prefix = "spring.http.encoding", value = "enabled", matchIfMissing = true)
+		当属性满足要求时，此条件成立  ：要求 如果没有配置spring.http.encoding.enabled=xxx, 则成立。
+		
+		
+		总结：1每一个XxAutoConfiguration 都有很多条件@ConditionalOnXxx，当这些条件都满足时，则此配置自动装配生效（utf-8编码格式）。
+		但是我们可以手工修改改 自动装配： XxxProperties文件中的prefix.属性名=value 
+	        2全局配置文件中的key， 来源于某个Properties文件中的 prefix+属性名     --boot通过XxAutoConfiguration实现自动装配 ，修改默认值 XxxProperties（ prefix+属性名）
+	     	
+		如何知道spring boot开启了哪些自动装配、禁止了哪些自动装配的方法: application.properties中 debug=true
+		Positive matches列表 表示 spring boot自动开启的装配
+		Negative matches列表 表示spring boot在此时 并没有启用的自动装配。
+            

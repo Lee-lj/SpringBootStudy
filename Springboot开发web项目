@@ -1,0 +1,75 @@
+springboot开发Web项目 (静态资源 html css js  )
+	
+	new - spring starer -设置（选择 需要的场景，web）
+
+	spring boot是一个jar，因此 静态资源就不是再存放到 webapps中， 存放在哪里？
+	静态资源的存放路径 通过WebMvcAutoConfiguration类-addResourceHandlers()指定:/webjars/
+	spring boot将静态资源存入到jar包中，引入: 从Jar目录结构的webjars开始写：http://localhost:8080/webjars/jquery/3.3.1-1/jquery.js
+	
+	如何自己写 静态资源，如何放到如spring boot中？  将自己写的 静态资源打成jar包,同上（不推荐）；
+	加入jquery依赖:
+	<dependency>
+           <groupId>org.webjars</groupId>
+           <artifactId>jquery</artifactId>
+           <version>3.3.1-1</version>
+    </dependency>
+	推荐：spring boot约定： spring boot将一些目录结构设置成静态资源存放目录，  我们的静态资源直接放入这些目录即可 。目录在哪里？ 
+	ResourceProperties类中的CLASSPATH_RESOURCE_LOCATIONS中设置：
+	 {
+			"classpath:/META-INF/resources/", 
+			"classpath:/resources/",
+			"classpath:/static/", "classpath:/public/" 三种结构选一种建立文件夹即可
+	 }
+ 	注意：在以上目录存放资源文件后，访问时  不需要加前缀，直接访问即可：http://localhost:8080/world.html
+
+	设置欢迎页：
+	WebMvcAutoConfiguration类中的welcomePageHandlerMapping() -->getIndexHtml() --> location + "index.html" ,即 任意一个静态资源目录中的 Index.html就是欢迎页
+	
+	网站中  网页标签的Logo是固定名字 :favicon.ico
+	自定义 favicon.ico:阅读 源码(WebMvcAutoConfiguration)得知 ：只需要将  favicon.ico文件 放入 任意静态资源目录中即可。
+		
+	总结：1.通过源码发现静态资源的目录	2.用静态资源：只需要将静态资源放入 以上目录即可
+	      3. 其他特定的文件（欢迎页、ico），只需要 根据约定（名字固定为欢迎页index.html  静态logo:favicon.ico）  放入该目录即可
+	
+	
+	如何自定义静态资源目录（Properties文件中的 prefix+属性） ：
+			spring.resources.static-locations=classpath:/res/, classpath:/img/
+
+	以上就将 静态资源目录设置为了classpath:/res/, classpath:/img/ ，注意 自定义静态资源目录后  以前默认的目录会失效
+
+	
+	动态资源：  JSP(spring boot默认不支持)
+		   推荐：模板引擎 thymeleaf(等价于JSP动态资源)
+		   模板引擎相当于将   网页分为=模板+数据(相当于模板当中定义了${username}，在数据模块中通过set获取数据然后传给模板，让模板显示出来)
+
+	引入thymeleaf：到官网查询 thymeleaf的依赖（Maven）
+	
+
+	使用thymeleaf:代码在哪里写？
+		通过ThymeleafAutoCongifutation自动装配 、
+		通过XxProperties更改属性值
+	通过ThymeleafProperties源码得知：
+	使用thymeleaf只需要将 文件放入目录："classpath:/templates/";  文件的后缀： ".html";
+	
+	注意：在以前传统的web项目中：静态资源修改后  是不需要重启的；但是在spring boot项目中，修改后 需要重启。
+		
+	
+
+		<p th:text="${welcome}">welcome to thymeleaf....</p>以上，先从${welcome}中取值（controller），如果有 则直接显示；如果没有，则在显示welcome to thymeleaf....
+	
+		th就是替换原有html的值：th:html属性名=值 ;
+		<p id="pid" class="pclass"  th:id="${welcome}" th:class="${welcome}"  th:text="${welcome}">welcome to thymeleaf....</p>
+
+		th:xx  (参见第10章  Attrubite Pre....)
+		th:text	  获取文本值	   显示 将hello 渲染为h1后的效果
+		th:utext  获取文本值(不转义) 显示<h1>hello</h1>
+		
+		例如创建一个students集合，他的单个属性为student，用map的put方法将students放入存储器，然后在html中遍历，用表格方式输出:
+		<tr th:each="student : ${students}">
+		<td th:text="${student.属性}">Onions</td>
+		<td th:text="${student.属性}">2.41</td>
+   	    <td th:text="${student.属性}? #{true} : #{false}">yes</td>   #为国际化形式
+   	    
+   	    
+		符号
+		th:text="${welcome}" ，除了$以外  其他符号？ 查看第四章  Standard Express....

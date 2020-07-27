@@ -1,0 +1,134 @@
+配置文件，作用：spring boot 自动配置(自动配置基于约定，例如默认端口号(8080)).可以使用配置文件 对默认的配置 进行修改
+
+默认的全局配置文件:
+       1.application.properties
+                                         书写格式:通过KV对，对属性进行设置 例如server.port(K)=8888(V) 
+              application-properties的赋值方式:
+                                student.name=lj
+                                student.age=21
+       2.application.yml   不是一个标记文档，和xml(xml是一个标记文档)相对
+                                           例如xml修改端口号书写格式为: 
+                          <server>
+                               <port>8888</port>
+                               <path>a/b/c</path>
+                          </server>
+                                         则yml书写格式:yml规定冒号之后如果是要赋的值那么冒号之后必须加一位空格，通过垂直对齐指定层次关系
+                       server:
+                            port: 8888
+                            path: a/b/c
+                                         通过yml来给学生注入对象步骤:
+                     1.在要注入的类的头部加上注解(对象属性所在的类不用添加，例如pet):
+                           @Component//将此Javabean放入spring容器
+                           @ConfigurationProperties(prefix="student")//通过这个注解与yml以及properties中要注入的类建立映射，student就是yml中的对象属性名
+                     2.编写yml:
+                           student:
+                                name: 李俊
+                                  age: 21
+                                  sex: true
+                                  birthday: 1999/03/18
+                                #  location: {province: 陕西,city: 宝鸡,zone: 扶风}
+                                #location还可以用类似于数组集合的-方式来注入
+                                  location: #类似于数组集合的-方式来注入
+                                      - province: 陕西
+                                      - city: 宝鸡
+                                      - zone: 扶风
+                                #  hobbies: 
+                                #       - 游戏
+                                #       - 音乐
+                                # skills:
+                                #       - 电竞
+                                #       - 剪辑
+                                #       - 编程
+                                #数组和集合都用-来赋值  ,对象类型直接写对象的各个属性       
+                                #数组和集合也可以使用行内写法，例如
+                                  hobbies: [游戏,音乐]    #行内写法
+                                  skills: [电竞,剪辑,编程]   #行内写法
+                                  pet:
+                                     nickname: 阿布
+                                     type: cat 
+                                # pet: {nickname: 阿布,type: cat}  pet的行内写法，注意，如果是对象属性，括号要用大括号  
+                    3.在test中取bean:
+                    @Autowired//将IOC容器中的bean自动加载
+	                Student student;
+                   
+                                                                注意:对于对象属性，行内写法要用大括号 数组和集合也可以使用行内写法，location还可以用类似于数组集合的-方式来注入 冒号之后如果是要赋的值那么冒号之后必须加一位空格
+                         Set/List/数组用[],map用{},对象属性也用{},中括号可以省略，大括号不能省略         
+                         yml赋值时默认可以不写引号； ""会将其中的转义符进行转义(例如双引号中加了\n，那么输出就会换行，而单引号不会换行)，其他不会                              
+                     application-properties和yml中赋的值可以互补(例如yml中没有赋值的name和age可以通过properties赋值)
+                     
+                     
+                                                                   除了 @ConfigurationProperties(prefix="student")（依赖yml和properties注入的名），还可以使用Value(""),在类中直接赋值，见studetn类
+                                                                   但是如果同时用了 @ConfigurationProperties和value，那么ConfigurationProperties的优先级高于value，会将value注入的值覆盖
+                     
+                                                          两种注值方式的异同:                                       
+                     		@ConfigurationProperties	@Value
+                                                         注值		                       批量注入				单个
+                                                         松散语法		                支持				不支持
+                   SpEL		                        不支持				支持
+                   JSR303数据校验	                 支持				不支持
+                                                         注入复杂类型	                             支持				不支持
+                                             松散语法(例如pet当中的nickName，yml注入时  松散写法:nick-name等价于nickName，-后大写改小写)
+               SpringEL:yml中给name注入name: 李俊，然后在student类中@Value("${student.name}"),将这个值传递给name，@ConfigurationProperties不支持这种写法
+               @Validated//开启JSR303数据校验的注解，然后通过@ConfigurationProperties注入值，如果通过Value注入值，将不会校验注入的值(不支持)
+                                             注入复杂类型	        简单类型：(8个基本类型/String/Date)
+                                                                                例如Map激素hi一个复杂类型，只能通过@ConfigurationProperties注入location: {province: 陕西,city: 宝鸡,zone: 扶风}
+                                              @Value不能对复杂类型注入
+
+          @PropertySource注解:默认会加载application.properties/application.yml文件中的数据；
+	                                      例如student类中@PropertySource(value={"classpath:conf.properties"})加载conf.properties文件中的数据；
+	                                      但是，@PropertySource只能加载properties，不能加载.yml文件，但是默认的application.yml会加载
+          
+          @ImportResourcespring boot自动装配/自动配置.(在spring中原来要手工添加的配置文件,但是spring boot中会自动给配置好。)
+	                                       如果要自己编写spring等配置文件, spring boot能否识别？  默认不识别。 如果需要识别，则需要在spring boot主配置类上 通过@ImportResource指定配置文件的路径
+                                                   配置文件分为xml配置文件，和注解声明的配置类   但是不推荐手写spring配置文件(.xml)。推荐通过注解来配置  
+                 Spring boot推荐使用注解方式进行配置:写一个类(例如Appconfig类，包一般都为.config声明为配置信息)，然后类的头部加上@Configuration
+                                                   类中的方法加上@Bean，这个方法就相当于添加了bean  具体如下:
+                             @Configuration
+                             public class AppConfig {
+	                             @Bean
+	                             public StudentService studentService() {//studentService相当于bean的id
+	                             	StudentService studentserv=new StudentService();
+	                             	studentDao stuDao-new studentDao();
+		                            studentService.setStudentDao(stuDao)通过service的set方法给service注入dao，相当于bean中的property，ref来进行依赖注入关系的建立
+		
+		                            return studentserv;//bean的class
+		                             /* 相当于xml中对bean的配置语句                           在这里studentService相当于bean的id，return studentserv 相当于bean的class
+		                              * <bean id="studentService" class="org.yq.HelloWorld.service.StudentService"></bean>
+		                              */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

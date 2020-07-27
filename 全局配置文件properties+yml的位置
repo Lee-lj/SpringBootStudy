@@ -1,0 +1,40 @@
+配置文件的位置
+properties和yml中的配置，相互补充；如果冲突，则properties优先级高。
+
+	1.项目内部的配置文件： 
+	       spring boot默认能够读取的application.properties/application.yml，这2个文件 可以存在于以下4个地方：
+	       file:项目根目录/config	 	application.properties  (直接在helloworld项目下创建config文件夹，将properties/yml粘贴过去)
+	       file:项目根目录			application.properties      (直接在helloworld项目下将properties/yml粘贴)
+	       classpath:项目根目录/config	application.properties  (默认存在的位置,创建config文件夹，将properties/yml粘贴过去)
+	       classpath:项目根目录		application.properties  (默认存在的位置)
+	              注意:			
+	       a.如果某项配置冲突，则优先级从上往下
+	       b.如果不冲突，则互补结合使用
+
+	               配置项目名：加上项目名之后在web中的路径就要加上项目名(原来的路径:localhost:8888/直接controller的接口，加项目名后localhost:8888/项目名/接口)
+	       properties文件中
+	       server.servlet.context-path=/boot
+	       yml中:
+	       Spring:
+	         servlet:
+                context-path: /boot
+           
+	2.项目外部的配置文件： (补救措施) 外部文件同样是properties或者yml
+	                   在项目STS(Eclipse)右键:run as :Run configuration ,argumenets:声明外部文件存放的位置
+	      --spring.config.location=D:/application.properties
+	                   如果 同一个配置 同时存在于 内部配置文件 和外部配置文件，则外部配置会覆盖内部配置
+	
+	            已经打好的HW.jar   在运行时将端口号8881改为8882，不用重新打jar，只需要外部配置好文件
+	            通过命令行cmd调用外部配置文件:
+	java -jar  项目.jar  --spring.config.location=D:/application.properties
+
+	3.项目运行参数： (补救)
+	在项目STS(Eclipse)右键run as :Run configuration ,argumenets:
+	--server.port=8883
+	通过命令行cmd调用外部配置文件
+	java -jar  项目.jar  --server.port=8883
+
+	多个地方配置时，如果冲突，优先级如下:
+	(运行参数 )>命令参数（调用外部的配置文件 >内部文件 (properties>yaml)
+
+	官网对多配置时的顺序说明：https://docs.spring.io/spring-boot/docs/2.0.4.RELEASE/reference/htmlsingle/#boot-features-external-config

@@ -1,0 +1,19 @@
+占位符表达式在properties和yml中都可以使用
+         properties中:student.age=24
+                 占位表达符随机数:
+                  ${random.uuid} 根据硬件等对电脑生成不重复标识符
+                  ${random.value} 随机字符串
+                  ${random.int} 随机整数型
+                  ${random.int(max)} max以内的整型数
+                  ${random.int(min,max)} 指定范围的整型数	
+                  ${random.long} 随机长整数型
+                  ${random.long(max)}
+                  ${random.long(min,max)}
+                  则properties中可以写为student.age=${random.uuid}，随机生成一个整数
+                  
+      properties和yml中的属性可以相互引用，例如properties中:student.name=dads,如果要在yml中引用这个值，格式为name: ${student.name}
+      yml中：
+	  student:
+  		 name: ${student.user.name2:无名}表示如果student.user.name2这个值不存在，则使用默认值:无名
+      
+      
